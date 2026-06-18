@@ -1,37 +1,20 @@
 const cron = require('node-cron');
 const supabase = require('./db');
-const { fetchUserLists, diffSnapshots, analyzeMutual, sendFollowRequest } = require('./scraper');
-const { sendUnfollowAlert, sendNewFollowerAlert, sendPrivatePendingAlert } = require('./notifier');
+const { fetchUserLists, diffSnapshots, analyzeMutual } = require('./scraper');
 
-const jobs = new Map(); // userId → cron task
+const jobs = new Map();
 
 async function runCheckForUser(user) {
-  // Re-fetch user from DB so pending_follow and other fields are always current
   const { data: freshUser } = await supabase.from('users').select('*').eq('id', user.id).single();
   if (!freshUser) return;
   user = freshUser;
 
   let lists;
-
   try {
     lists = await fetchUserLists(user.instagram_username);
   } catch (err) {
-    if (err.message === 'PRIVATE') {
-      if (!user.pending_follow) {
-        await sendFollowRequest(user.instagram_username);
-        await supabase.from('users').update({ pending_follow: true }).eq('id', user.id);
-        if (user.telegram_chat_id) {
-          await sendPrivatePendingAlert(user.telegram_chat_id, user.instagram_username);
-        }
-      }
-      return;
-    }
     console.error(`Scrape failed for ${user.instagram_username}:`, err.message);
     return;
-  }
-
-  if (user.pending_follow) {
-    await supabase.from('users').update({ pending_follow: false }).eq('id', user.id);
   }
 
   const { data: lastSnapshots } = await supabase
@@ -43,17 +26,15 @@ async function runCheckForUser(user) {
 
   const lastSnap = lastSnapshots?.[0] || null;
 
-  await supabase
-    .from('snapshots')
-    .insert({
-      user_id: user.id,
-      follower_count: lists.followers.length,
-      following_count: lists.following.length,
-      follower_list: lists.followers,
-      following_list: lists.following,
-    });
+  await supabase.from('snapshots').insert({
+    user_id: user.id,
+    follower_count: lists.followers.length,
+    following_count: lists.following.length,
+    follower_list: lists.followers,
+    following_list: lists.following,
+  });
 
-  if (!lastSnap) return;
+  if (!lastSnap || lastSnap.follower_count === 0) return;
 
   const { unfollowed, newFollowers } = diffSnapshots(
     lastSnap.follower_list || [],
@@ -68,7 +49,6 @@ async function runCheckForUser(user) {
       count_before: lastSnap.follower_count,
       count_after: lists.followers.length,
     });
-    if (user.telegram_chat_id) await sendUnfollowAlert(user.telegram_chat_id, username);
   }
 
   for (const username of newFollowers) {
@@ -79,15 +59,10 @@ async function runCheckForUser(user) {
       count_before: lastSnap.follower_count,
       count_after: lists.followers.length,
     });
-    if (user.telegram_chat_id) await sendNewFollowerAlert(user.telegram_chat_id, username);
   }
 
   const { youFollowNoReturn, theyFollowNoReturn } = analyzeMutual(lists.followers, lists.following);
-
-  const prevMutual = analyzeMutual(
-    lastSnap.follower_list || [],
-    lastSnap.following_list || []
-  );
+  const prevMutual = analyzeMutual(lastSnap.follower_list || [], lastSnap.following_list || []);
   const prevYFNR = new Set(prevMutual.youFollowNoReturn);
   const prevTFNR = new Set(prevMutual.theyFollowNoReturn);
 
