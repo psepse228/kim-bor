@@ -18,7 +18,8 @@ async function getUserId(username) {
 }
 
 async function fetchList(userId, type) {
-  const results = [];
+  const regular = [];
+  const verified = [];
   let maxId = null;
 
   do {
@@ -32,19 +33,24 @@ async function fetchList(userId, type) {
 
     const [users, nextCursor] = res.data;
     for (const u of (users || [])) {
-      if (!u.is_verified) results.push(u.username);
+      if (u.is_verified) verified.push(u.username);
+      else regular.push(u.username);
     }
     maxId = nextCursor || null;
   } while (maxId);
 
-  return results;
+  return { regular, verified };
 }
 
 async function fetchUserLists(username) {
   const userId = await getUserId(username);
   const followers = await fetchList(userId, 'followers');
   const following = await fetchList(userId, 'following');
-  return { followers, following };
+  return {
+    followers: followers.regular,
+    following: following.regular,
+    followingVerified: following.verified,
+  };
 }
 
 function diffSnapshots(oldList, newList) {

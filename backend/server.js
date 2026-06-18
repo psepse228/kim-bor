@@ -113,6 +113,7 @@ app.get('/dashboard/:userId', async (req, res) => {
   const latestSnap = snapshots?.[0] || null;
 
   let youFollowNoReturn = [];
+  let youFollowNoReturnVerified = [];
   let theyFollowNoReturn = [];
   if (latestSnap) {
     const { analyzeMutual } = require('./scraper');
@@ -122,6 +123,9 @@ app.get('/dashboard/:userId', async (req, res) => {
     );
     youFollowNoReturn = result.youFollowNoReturn;
     theyFollowNoReturn = result.theyFollowNoReturn;
+
+    const followerSet = new Set(latestSnap.follower_list || []);
+    youFollowNoReturnVerified = (latestSnap.following_verified_list || []).filter(u => !followerSet.has(u));
   }
 
   const { data: events } = await supabase
@@ -147,6 +151,7 @@ app.get('/dashboard/:userId', async (req, res) => {
       : null,
     sparkline,
     youFollowNoReturn,
+    youFollowNoReturnVerified,
     theyFollowNoReturn,
     events: events || [],
   });
@@ -170,33 +175,6 @@ app.post('/analyze/:userId', async (req, res) => {
   return res.status(202).json({ message: 'Analysis triggered. Refresh in ~30 seconds.' });
 });
 
-// GET /verified-noreturn/:userId
-app.get('/verified-noreturn/:userId', async (req, res) => {
-  const { userId } = req.params;
-
-  const { data: user } = await supabase
-    .from('users')
-    .select('*')
-    .eq('id', userId)
-    .eq('is_verified', true)
-    .single();
-
-  if (!user) return res.status(404).json({ error: 'Not found.' });
-
-  const { data: snapshots } = await supabase
-    .from('snapshots')
-    .select('follower_list')
-    .eq('user_id', userId)
-    .order('taken_at', { ascending: false })
-    .limit(1);
-
-  const followerSet = new Set(snapshots?.[0]?.follower_list || []);
-  const { fetchVerifiedFollowing } = require('./scraper');
-  const verifiedFollowing = await fetchVerifiedFollowing(user.instagram_username);
-  const youFollowNoReturnVerified = verifiedFollowing.filter(u => !followerSet.has(u));
-
-  return res.json({ youFollowNoReturnVerified });
-});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, async () => {

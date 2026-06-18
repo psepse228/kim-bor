@@ -32,6 +32,7 @@ async function runCheckForUser(user) {
     following_count: lists.following.length,
     follower_list: lists.followers,
     following_list: lists.following,
+    following_verified_list: lists.followingVerified || [],
   });
 
   if (!lastSnap || lastSnap.follower_count === 0) return;

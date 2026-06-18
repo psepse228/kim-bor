@@ -615,7 +615,6 @@
   const HEADERS = { 'Content-Type': 'application/json' };
 
   let pendingUserId = null;
-  let verifiedLoaded = false;
   let verifiedActive = false;
 
   function show(id) {
@@ -734,40 +733,12 @@
   });
 
   // ── Verified toggle ──
-  document.getElementById('verified-toggle').addEventListener('click', async () => {
-    const userId = localStorage.getItem('igcheck_userId');
-    if (!userId) return;
-
+  document.getElementById('verified-toggle').addEventListener('click', () => {
     const toggleWrap = document.getElementById('verified-toggle');
     const section = document.getElementById('verified-section');
-    const verifiedList = document.getElementById('table-verified');
-
     verifiedActive = !verifiedActive;
     toggleWrap.classList.toggle('active', verifiedActive);
-
-    if (!verifiedActive) {
-      section.classList.add('hidden');
-      return;
-    }
-
-    if (!verifiedLoaded) {
-      verifiedList.innerHTML = '<span class="empty-state pulsing">Loading...</span>';
-      section.classList.remove('hidden');
-
-      try {
-        const res = await fetch(`${API_URL}/verified-noreturn/${userId}`, { headers: HEADERS });
-        const data = await res.json();
-        const list = data.youFollowNoReturnVerified || [];
-        verifiedList.innerHTML = list.length
-          ? list.map(u => chip(u, 'verified')).join('')
-          : '<span class="empty-state">No verified accounts</span>';
-        verifiedLoaded = true;
-      } catch {
-        verifiedList.innerHTML = '<span class="empty-state">Failed to load</span>';
-      }
-    } else {
-      section.classList.remove('hidden');
-    }
+    section.classList.toggle('hidden', !verifiedActive);
   });
 
   // ── Sparkline ──
@@ -855,6 +826,11 @@
     youFollowEl.innerHTML = data.youFollowNoReturn.length
       ? data.youFollowNoReturn.map(u => chip(u, 'red')).join('')
       : '<span class="empty-state">Everyone follows back ✓</span>';
+
+    const verifiedList = document.getElementById('table-verified');
+    verifiedList.innerHTML = (data.youFollowNoReturnVerified || []).length
+      ? (data.youFollowNoReturnVerified || []).map(u => chip(u, 'verified')).join('')
+      : '<span class="empty-state">No verified accounts</span>';
 
     const theyFollowEl = document.getElementById('table-they-follow');
     theyFollowEl.innerHTML = data.theyFollowNoReturn.length
