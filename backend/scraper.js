@@ -1,43 +1,56 @@
 const axios = require('axios');
 
-const ACTOR = 'figue~instagram-followers-and-following-scrapper';
+const BASE = 'https://api.hikerapi.com';
 
-async function apifyRun(input) {
-  const res = await axios.post(
-    `https://api.apify.com/v2/acts/${ACTOR}/run-sync-get-dataset-items`,
-    input,
-    {
-      params: { token: process.env.APIFY_TOKEN },
-      timeout: 300000,
+function headers() {
+  return { 'x-access-key': process.env.HIKER_API_KEY };
+}
+
+async function getUserId(username) {
+  const res = await axios.get(`${BASE}/v1/user/by/username`, {
+    params: { username },
+    headers: headers(),
+  });
+  const user = res.data;
+  if (!user || !user.pk) throw new Error('ACCOUNT_NOT_FOUND');
+  if (user.is_private) throw new Error('PRIVATE');
+  return user.pk;
+}
+
+async function fetchList(userId, type) {
+  const regular = [];
+  const verified = [];
+  let maxId = null;
+
+  do {
+    const params = { user_id: userId };
+    if (maxId) params.max_id = maxId;
+
+    const res = await axios.get(`${BASE}/v1/user/${type}/chunk`, {
+      params,
+      headers: headers(),
+    });
+
+    const [users, nextCursor] = res.data;
+    for (const u of (users || [])) {
+      if (u.is_verified) verified.push(u.username);
+      else regular.push(u.username);
     }
-  );
-  return Array.isArray(res.data) ? res.data : [];
+    maxId = nextCursor || null;
+  } while (maxId);
+
+  return { regular, verified };
 }
 
 async function fetchUserLists(username) {
-  const [followersRaw, followingRaw] = await Promise.all([
-    apifyRun({ username, type: 'followers' }),
-    apifyRun({ username, type: 'following' }),
-  ]);
-
-  if (!followersRaw.length && !followingRaw.length) {
-    throw new Error('PRIVATE');
-  }
-
-  const followers = [];
-  const following = [];
-  const followingVerified = [];
-
-  for (const u of followersRaw) {
-    if (!u.is_verified) followers.push(u.username);
-  }
-
-  for (const u of followingRaw) {
-    if (u.is_verified) followingVerified.push(u.username);
-    else following.push(u.username);
-  }
-
-  return { followers, following, followingVerified };
+  const userId = await getUserId(username);
+  const followers = await fetchList(userId, 'followers');
+  const following = await fetchList(userId, 'following');
+  return {
+    followers: followers.regular,
+    following: following.regular,
+    followingVerified: following.verified,
+  };
 }
 
 function diffSnapshots(oldList, newList) {
