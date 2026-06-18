@@ -6,7 +6,10 @@ const { initScheduler, addUserJob, runCheckForUser } = require('./scheduler');
 const { bot, resolveOTP } = require('./notifier');
 
 const app = express();
-app.use(cors({ origin: process.env.FRONTEND_URL }));
+app.use(cors({
+  origin: process.env.FRONTEND_URL,
+  allowedHeaders: ['Content-Type', 'ngrok-skip-browser-warning'],
+}));
 app.use(express.json());
 
 // POST /register
@@ -165,6 +168,34 @@ app.post('/analyze/:userId', async (req, res) => {
   runCheckForUser(user).catch((err) => console.error('Manual analyze error:', err));
 
   return res.status(202).json({ message: 'Analysis triggered. Refresh in ~30 seconds.' });
+});
+
+// GET /verified-noreturn/:userId
+app.get('/verified-noreturn/:userId', async (req, res) => {
+  const { userId } = req.params;
+
+  const { data: user } = await supabase
+    .from('users')
+    .select('*')
+    .eq('id', userId)
+    .eq('is_verified', true)
+    .single();
+
+  if (!user) return res.status(404).json({ error: 'Not found.' });
+
+  const { data: snapshots } = await supabase
+    .from('snapshots')
+    .select('follower_list')
+    .eq('user_id', userId)
+    .order('taken_at', { ascending: false })
+    .limit(1);
+
+  const followerSet = new Set(snapshots?.[0]?.follower_list || []);
+  const { fetchVerifiedFollowing } = require('./scraper');
+  const verifiedFollowing = await fetchVerifiedFollowing(user.instagram_username);
+  const youFollowNoReturnVerified = verifiedFollowing.filter(u => !followerSet.has(u));
+
+  return res.json({ youFollowNoReturnVerified });
 });
 
 const PORT = process.env.PORT || 3000;

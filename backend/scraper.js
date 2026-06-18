@@ -65,8 +65,28 @@ function analyzeMutual(followers, following) {
   };
 }
 
+async function fetchVerifiedFollowing(username) {
+  const userId = await getUserId(username);
+  const verified = [];
+  let maxId = null;
+  do {
+    const params = { user_id: userId };
+    if (maxId) params.max_id = maxId;
+    const res = await axios.get(`${BASE}/v1/user/following/chunk`, {
+      params,
+      headers: headers(),
+    });
+    const [users, nextCursor] = res.data;
+    for (const u of (users || [])) {
+      if (u.is_verified) verified.push(u.username);
+    }
+    maxId = nextCursor || null;
+  } while (maxId);
+  return verified;
+}
+
 async function sendFollowRequest() {
   // Not supported — HikerAPI is read-only
 }
 
-module.exports = { fetchUserLists, diffSnapshots, analyzeMutual, sendFollowRequest };
+module.exports = { fetchUserLists, fetchVerifiedFollowing, diffSnapshots, analyzeMutual, sendFollowRequest };
