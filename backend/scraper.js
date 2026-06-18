@@ -31,7 +31,9 @@ async function fetchList(userId, type) {
     });
 
     const [users, nextCursor] = res.data;
-    for (const u of (users || [])) results.push(u.username);
+    for (const u of (users || [])) {
+      if (!u.is_verified) results.push(u.username);
+    }
     maxId = nextCursor || null;
   } while (maxId);
 
