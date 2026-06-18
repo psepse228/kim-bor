@@ -4,116 +4,504 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>kim bor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #e0e0e0; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-    .card { background: #161616; border: 1px solid #2a2a2a; border-radius: 16px; padding: 36px; width: 100%; max-width: 480px; }
-    h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; }
-    p.sub { color: #888; font-size: 0.9rem; margin-bottom: 28px; }
-    label { display: block; font-size: 0.8rem; color: #888; margin-bottom: 6px; margin-top: 16px; text-transform: uppercase; letter-spacing: 0.05em; }
-    input { width: 100%; background: #0a0a0a; border: 1px solid #333; border-radius: 8px; padding: 12px 14px; color: #e0e0e0; font-size: 1rem; }
-    input:focus { outline: none; border-color: #555; }
-    button { width: 100%; margin-top: 24px; padding: 13px; border-radius: 8px; border: none; background: #e0e0e0; color: #0a0a0a; font-size: 1rem; font-weight: 600; cursor: pointer; }
-    button:hover { background: #fff; }
-    .error { color: #ff6b6b; font-size: 0.85rem; margin-top: 12px; }
+
+    :root {
+      --bg: #07070f;
+      --surface: #0e0e1c;
+      --surface2: #13131f;
+      --border: rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.12);
+      --accent: #7c5cfc;
+      --accent-glow: rgba(124,92,252,0.25);
+      --accent-dim: rgba(124,92,252,0.1);
+      --green: #22c55e;
+      --green-dim: rgba(34,197,94,0.1);
+      --red: #ef4444;
+      --red-dim: rgba(239,68,68,0.1);
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --dim: #475569;
+      --r: 14px;
+      --rs: 9px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 16px;
+      background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(124,92,252,0.08) 0%, transparent 70%);
+    }
+
+    /* ── Auth cards ── */
+    .auth-wrap {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo-name {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(135deg, #fff 40%, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .logo-sub {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-top: 6px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 32px;
+    }
+
+    .field { margin-top: 20px; }
+
+    .field label {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .field input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--rs);
+      padding: 12px 14px;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color 0.15s;
+      outline: none;
+    }
+
+    .field input:focus { border-color: var(--accent); }
+
+    .btn-primary {
+      display: block;
+      width: 100%;
+      margin-top: 24px;
+      padding: 13px;
+      border-radius: var(--rs);
+      border: none;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: opacity 0.15s, box-shadow 0.15s;
+      box-shadow: 0 0 24px var(--accent-glow);
+    }
+
+    .btn-primary:hover { opacity: 0.88; }
+
+    .error-msg {
+      color: var(--red);
+      font-size: 0.82rem;
+      margin-top: 12px;
+      padding: 10px 12px;
+      background: var(--red-dim);
+      border-radius: var(--rs);
+      border: 1px solid rgba(239,68,68,0.2);
+    }
+
+    /* ── Dashboard ── */
+    #dashboard {
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .dash-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .dash-user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      border: 2px solid var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: font-size;
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--accent);
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .dash-user-info h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .dash-user-info span {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .btn-refresh {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      color: var(--text);
+      border-radius: var(--rs);
+      padding: 9px 18px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .btn-refresh:hover { border-color: var(--accent); background: var(--accent-dim); }
+    .btn-refresh.loading { opacity: 0.6; pointer-events: none; }
+
+    /* ── Stats ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 22px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .stat-card:hover::before { opacity: 1; }
+
+    .stat-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .stat-num {
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .stat-sub {
+      font-size: 0.75rem;
+      color: var(--dim);
+      margin-top: 6px;
+    }
+
+    /* ── Sparkline ── */
+    .chart-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 20px;
+      margin-bottom: 14px;
+    }
+
+    .chart-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .chart-card canvas {
+      width: 100%;
+      height: 64px;
+      display: block;
+    }
+
+    /* ── Two-col tables ── */
+    .tables-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 20px;
+    }
+
+    .table-card h3 {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .user-list { list-style: none; }
+
+    .user-list li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.88rem;
+      color: var(--text);
+    }
+
+    .user-list li:last-child { border-bottom: none; }
+
+    .user-list li::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--red);
+      flex-shrink: 0;
+    }
+
+    .user-list.they li::before { background: var(--accent); }
+
+    .empty-state {
+      color: var(--dim);
+      font-size: 0.83rem;
+      padding: 8px 0;
+    }
+
+    /* ── Event feed ── */
+    .feed-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 20px;
+      margin-bottom: 14px;
+    }
+
+    .feed-card h3 {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .event-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: var(--rs);
+      margin-bottom: 6px;
+      gap: 12px;
+    }
+
+    .event-item:last-child { margin-bottom: 0; }
+
+    .event-item.unfollow { background: var(--red-dim); border: 1px solid rgba(239,68,68,0.15); }
+    .event-item.follow { background: var(--green-dim); border: 1px solid rgba(34,197,94,0.15); }
+
+    .event-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.88rem;
+    }
+
+    .event-icon {
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .event-text strong { font-weight: 600; }
+    .event-text .ev-action { color: var(--muted); }
+
+    .event-time {
+      font-size: 0.75rem;
+      color: var(--dim);
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      color: var(--dim);
+      font-size: 0.75rem;
+      padding: 24px 0 8px;
+    }
+
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+
+    /* ── Utilities ── */
     .hidden { display: none !important; }
-    #dashboard { max-width: 900px; padding: 24px 16px; width: 100%; }
-    .stats-row { display: flex; gap: 16px; margin-bottom: 24px; }
-    .stat-box { flex: 1; background: #161616; border: 1px solid #2a2a2a; border-radius: 12px; padding: 20px; text-align: center; }
-    .stat-box .num { font-size: 2rem; font-weight: 700; }
-    .stat-box .lbl { color: #888; font-size: 0.8rem; margin-top: 4px; }
-    .sparkline { background: #161616; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 24px; }
-    .sparkline canvas { width: 100%; height: 60px; display: block; }
-    .tables-row { display: flex; gap: 16px; margin-bottom: 24px; }
-    .table-box { flex: 1; background: #161616; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; }
-    .table-box h3 { font-size: 0.85rem; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
-    .table-box ul { list-style: none; }
-    .table-box li { padding: 8px 0; border-bottom: 1px solid #222; font-size: 0.9rem; }
-    .table-box li:last-child { border-bottom: none; }
-    .empty { color: #555; font-size: 0.85rem; }
-    .feed { background: #161616; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; margin-bottom: 24px; }
-    .feed h3 { font-size: 0.85rem; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px; }
-    .feed-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #222; font-size: 0.9rem; }
-    .feed-item:last-child { border-bottom: none; }
-    .feed-item .time { color: #555; font-size: 0.75rem; }
-    .unfollow { color: #ff6b6b; }
-    .follow { color: #69db7c; }
-    .refresh-btn { background: #161616; border: 1px solid #333; color: #e0e0e0; border-radius: 8px; padding: 10px 20px; cursor: pointer; font-size: 0.85rem; }
-    .refresh-btn:hover { border-color: #555; }
-    footer { text-align: center; color: #444; font-size: 0.75rem; margin-top: 32px; padding-bottom: 24px; }
-    footer a { color: #555; text-decoration: none; }
-    footer a:hover { color: #888; }
-    @media (max-width: 600px) { .tables-row { flex-direction: column; } .stats-row { flex-direction: column; } }
+
+    @media (max-width: 640px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .stats-grid .stat-card:last-child { grid-column: span 2; }
+      .tables-grid { grid-template-columns: 1fr; }
+      .stat-num { font-size: 1.7rem; }
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spin { display: inline-block; animation: spin 1s linear infinite; }
   </style>
 </head>
 <body>
 
-<!-- View 1: Register -->
-<div class="card" id="view-register">
-  <h1>kim bor</h1>
-  <p class="sub">Track your Instagram followers. Get notified instantly.</p>
-  <label>Invite Password</label>
-  <input type="password" id="reg-password" placeholder="Enter invite password" />
-  <label>Instagram Username</label>
-  <input type="text" id="reg-username" placeholder="@yourhandle" />
-  <button id="reg-btn">Get Started</button>
-  <p class="error hidden" id="reg-error"></p>
+<!-- ── View 1: Register ── -->
+<div class="auth-wrap hidden" id="view-register">
+  <div class="logo">
+    <div class="logo-name">kim bor</div>
+    <div class="logo-sub">Instagram follower tracker</div>
+  </div>
+  <div class="card">
+    <div class="field">
+      <label>Invite Password</label>
+      <input type="password" id="reg-password" placeholder="Enter invite code" />
+    </div>
+    <div class="field">
+      <label>Instagram Username</label>
+      <input type="text" id="reg-username" placeholder="@yourhandle" />
+    </div>
+    <button class="btn-primary" id="reg-btn">Get Started →</button>
+    <p class="error-msg hidden" id="reg-error"></p>
+  </div>
 </div>
 
-<!-- View 2: OTP Verify -->
-<div class="card hidden" id="view-otp">
-  <h1>Verify Telegram</h1>
-  <p class="sub" id="otp-instruction">Message @BotName on Telegram — it will send you a 6-digit code.</p>
-  <label>Verification Code</label>
-  <input type="text" id="otp-input" placeholder="123456" maxlength="6" />
-  <button id="otp-btn">Verify</button>
-  <p class="error hidden" id="otp-error"></p>
+<!-- ── View 2: OTP ── -->
+<div class="auth-wrap hidden" id="view-otp">
+  <div class="logo">
+    <div class="logo-name">kim bor</div>
+  </div>
+  <div class="card">
+    <p style="color:var(--muted);font-size:0.9rem;margin-bottom:4px;" id="otp-instruction">Message the bot on Telegram to get your 6-digit code.</p>
+    <div class="field">
+      <label>Verification Code</label>
+      <input type="text" id="otp-input" placeholder="123456" maxlength="6" />
+    </div>
+    <button class="btn-primary" id="otp-btn">Verify →</button>
+    <p class="error-msg hidden" id="otp-error"></p>
+  </div>
 </div>
 
-<!-- View 3: Dashboard -->
+<!-- ── View 3: Dashboard ── -->
 <div id="dashboard" class="hidden">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-    <h1 style="font-size:1.3rem;">@<span id="dash-username"></span></h1>
-    <button class="refresh-btn" id="refresh-btn">↻ Refresh Analysis</button>
+  <div class="dash-header">
+    <div class="dash-user">
+      <div class="avatar" id="dash-avatar">?</div>
+      <div class="dash-user-info">
+        <h2>@<span id="dash-username"></span></h2>
+        <span id="dash-status">Loading...</span>
+      </div>
+    </div>
+    <button class="btn-refresh" id="refresh-btn">
+      <span id="refresh-icon">↻</span> Refresh Analysis
+    </button>
   </div>
 
-  <div class="stats-row">
-    <div class="stat-box">
-      <div class="num" id="stat-followers">—</div>
-      <div class="lbl">Followers</div>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Followers</div>
+      <div class="stat-num" id="stat-followers">—</div>
+      <div class="stat-sub" id="stat-followers-delta"></div>
     </div>
-    <div class="stat-box">
-      <div class="num" id="stat-following">—</div>
-      <div class="lbl">Following</div>
+    <div class="stat-card">
+      <div class="stat-label">Following</div>
+      <div class="stat-num" id="stat-following">—</div>
     </div>
-    <div class="stat-box">
-      <div class="num" id="stat-last-check">—</div>
-      <div class="lbl">Last Check</div>
+    <div class="stat-card">
+      <div class="stat-label">Last Check</div>
+      <div class="stat-num" style="font-size:1.4rem;" id="stat-last-check">—</div>
     </div>
   </div>
 
-  <div class="sparkline">
+  <div class="chart-card">
+    <div class="chart-label">Follower Trend</div>
     <canvas id="sparkline-canvas"></canvas>
   </div>
 
-  <div class="tables-row">
-    <div class="table-box">
+  <div class="tables-grid">
+    <div class="table-card">
       <h3>You follow · They don't</h3>
-      <ul id="table-you-follow"></ul>
+      <ul class="user-list" id="table-you-follow"></ul>
     </div>
-    <div class="table-box">
+    <div class="table-card">
       <h3>They follow · You don't</h3>
-      <ul id="table-they-follow"></ul>
+      <ul class="user-list they" id="table-they-follow"></ul>
     </div>
   </div>
 
-  <div class="feed">
+  <div class="feed-card">
     <h3>Recent Events</h3>
     <div id="event-feed"></div>
   </div>
-</div>
 
-<footer>Made by <a href="#">Solura</a></footer>
+  <footer>Made by <a href="#">Solura</a></footer>
+</div>
 
 <script>
   const API_URL = 'https://kim-bor-production.up.railway.app';
@@ -122,7 +510,7 @@
   let pendingUserId = null;
 
   function show(id) {
-    ['view-register', 'view-otp', 'dashboard'].forEach((v) => {
+    ['view-register', 'view-otp', 'dashboard'].forEach(v => {
       document.getElementById(v).classList.add('hidden');
     });
     document.getElementById(id).classList.remove('hidden');
@@ -138,30 +526,48 @@
     document.getElementById(id).classList.add('hidden');
   }
 
+  function timeAgo(dateStr) {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    return `${Math.floor(hrs / 24)}d ago`;
+  }
+
   document.getElementById('reg-btn').addEventListener('click', async () => {
     hideError('reg-error');
     const invitePassword = document.getElementById('reg-password').value.trim();
     const instagramUsername = document.getElementById('reg-username').value.trim();
     if (!invitePassword || !instagramUsername) return showError('reg-error', 'Fill in all fields.');
 
-    const res = await fetch(`${API_URL}/register`, {
-      method: 'POST',
-      headers: HEADERS,
-      body: JSON.stringify({ invitePassword, instagramUsername }),
-    });
-    const data = await res.json();
-    if (!res.ok) return showError('reg-error', data.error);
+    const btn = document.getElementById('reg-btn');
+    btn.textContent = 'Loading...';
+    btn.disabled = true;
 
-    if (data.alreadyVerified) {
-      localStorage.setItem('igcheck_userId', data.userId);
-      await loadDashboard(data.userId);
-      show('dashboard');
-      return;
+    try {
+      const res = await fetch(`${API_URL}/register`, {
+        method: 'POST', headers: HEADERS,
+        body: JSON.stringify({ invitePassword, instagramUsername }),
+      });
+      const data = await res.json();
+      if (!res.ok) return showError('reg-error', data.error);
+
+      if (data.alreadyVerified) {
+        localStorage.setItem('igcheck_userId', data.userId);
+        await loadDashboard(data.userId);
+        show('dashboard');
+        return;
+      }
+
+      pendingUserId = data.userId;
+      document.getElementById('otp-instruction').textContent = data.message;
+      show('view-otp');
+    } finally {
+      btn.textContent = 'Get Started →';
+      btn.disabled = false;
     }
-
-    pendingUserId = data.userId;
-    document.getElementById('otp-instruction').textContent = data.message;
-    show('view-otp');
   });
 
   document.getElementById('otp-btn').addEventListener('click', async () => {
@@ -169,64 +575,103 @@
     const otp = document.getElementById('otp-input').value.trim();
     if (!otp) return showError('otp-error', 'Enter the code.');
 
-    const res = await fetch(`${API_URL}/verify`, {
-      method: 'POST',
-      headers: HEADERS,
-      body: JSON.stringify({ userId: pendingUserId, otp }),
-    });
-    const data = await res.json();
-    if (!res.ok) return showError('otp-error', data.error);
+    const btn = document.getElementById('otp-btn');
+    btn.textContent = 'Verifying...';
+    btn.disabled = true;
 
-    localStorage.setItem('igcheck_userId', pendingUserId);
-    await loadDashboard(pendingUserId);
-    show('dashboard');
+    try {
+      const res = await fetch(`${API_URL}/verify`, {
+        method: 'POST', headers: HEADERS,
+        body: JSON.stringify({ userId: pendingUserId, otp }),
+      });
+      const data = await res.json();
+      if (!res.ok) return showError('otp-error', data.error);
+
+      localStorage.setItem('igcheck_userId', pendingUserId);
+      await loadDashboard(pendingUserId);
+      show('dashboard');
+    } finally {
+      btn.textContent = 'Verify →';
+      btn.disabled = false;
+    }
   });
 
   document.getElementById('refresh-btn').addEventListener('click', async () => {
     const userId = localStorage.getItem('igcheck_userId');
     if (!userId) return;
-    document.getElementById('refresh-btn').textContent = '↻ Analyzing...';
+
+    const btn = document.getElementById('refresh-btn');
+    const icon = document.getElementById('refresh-icon');
+    btn.classList.add('loading');
+    icon.classList.add('spin');
+    btn.querySelector ? null : null;
+
     await fetch(`${API_URL}/analyze/${userId}`, { method: 'POST', headers: HEADERS });
+
     setTimeout(async () => {
       await loadDashboard(userId);
-      document.getElementById('refresh-btn').textContent = '↻ Refresh Analysis';
+      btn.classList.remove('loading');
+      icon.classList.remove('spin');
     }, 30000);
   });
 
-  function drawSparkline(dataPoints) {
+  function drawSparkline(points) {
     const canvas = document.getElementById('sparkline-canvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = canvas.offsetWidth;
-    canvas.height = 60;
-    if (!dataPoints.length) return;
+    canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+    canvas.height = 64 * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
-    const counts = dataPoints.map((d) => d.follower_count);
+    const w = canvas.offsetWidth;
+    const h = 64;
+
+    if (!points.length) {
+      ctx.strokeStyle = 'rgba(124,92,252,0.2)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([6, 6]);
+      ctx.beginPath();
+      ctx.moveTo(0, h / 2);
+      ctx.lineTo(w, h / 2);
+      ctx.stroke();
+      return;
+    }
+
+    const counts = points.map(p => p.follower_count);
     const min = Math.min(...counts);
     const max = Math.max(...counts);
     const range = max - min || 1;
-    const w = canvas.width;
-    const h = canvas.height;
-    const step = w / (counts.length - 1 || 1);
+    const step = w / Math.max(counts.length - 1, 1);
+    const pad = 8;
 
-    ctx.clearRect(0, 0, w, h);
-    ctx.strokeStyle = '#69db7c';
-    ctx.lineWidth = 2;
+    const getY = c => h - pad - ((c - min) / range) * (h - pad * 2);
+
+    const grad = ctx.createLinearGradient(0, 0, 0, h);
+    grad.addColorStop(0, 'rgba(124,92,252,0.3)');
+    grad.addColorStop(1, 'rgba(124,92,252,0)');
+
     ctx.beginPath();
     counts.forEach((c, i) => {
       const x = i * step;
-      const y = h - ((c - min) / range) * (h - 10) - 5;
+      const y = getY(c);
       i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
     });
-    ctx.stroke();
-  }
+    const lastX = (counts.length - 1) * step;
+    ctx.lineTo(lastX, h);
+    ctx.lineTo(0, h);
+    ctx.closePath();
+    ctx.fillStyle = grad;
+    ctx.fill();
 
-  function timeAgo(dateStr) {
-    const diff = Date.now() - new Date(dateStr).getTime();
-    const mins = Math.floor(diff / 60000);
-    if (mins < 60) return `${mins}m ago`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
-    return `${Math.floor(hrs / 24)}d ago`;
+    ctx.beginPath();
+    counts.forEach((c, i) => {
+      const x = i * step;
+      const y = getY(c);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.strokeStyle = '#7c5cfc';
+    ctx.lineWidth = 2.5;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
   }
 
   async function loadDashboard(userId) {
@@ -234,34 +679,47 @@
     if (!res.ok) { localStorage.removeItem('igcheck_userId'); show('view-register'); return; }
     const data = await res.json();
 
-    document.getElementById('dash-username').textContent = data.user.instagram_username;
-    document.getElementById('stat-followers').textContent = data.latestSnapshot?.follower_count ?? '—';
-    document.getElementById('stat-following').textContent = data.latestSnapshot?.following_count ?? '—';
-    document.getElementById('stat-last-check').textContent = data.latestSnapshot ? timeAgo(data.latestSnapshot.taken_at) : '—';
+    const username = data.user.instagram_username;
+    document.getElementById('dash-username').textContent = username;
+    document.getElementById('dash-avatar').textContent = username[0].toUpperCase();
+
+    const snap = data.latestSnapshot;
+    if (snap) {
+      document.getElementById('stat-followers').textContent = snap.follower_count.toLocaleString();
+      document.getElementById('stat-following').textContent = snap.following_count.toLocaleString();
+      document.getElementById('stat-last-check').textContent = timeAgo(snap.taken_at);
+      document.getElementById('dash-status').textContent = `Updated ${timeAgo(snap.taken_at)}`;
+    } else {
+      document.getElementById('dash-status').textContent = 'First check pending...';
+    }
 
     drawSparkline(data.sparkline || []);
 
     const youFollowEl = document.getElementById('table-you-follow');
     youFollowEl.innerHTML = data.youFollowNoReturn.length
-      ? data.youFollowNoReturn.map((u) => `<li>@${u}</li>`).join('')
-      : '<li class="empty">None — everyone follows back ✓</li>';
+      ? data.youFollowNoReturn.map(u => `<li>@${u}</li>`).join('')
+      : '<li class="empty-state">Everyone follows back ✓</li>';
 
     const theyFollowEl = document.getElementById('table-they-follow');
     theyFollowEl.innerHTML = data.theyFollowNoReturn.length
-      ? data.theyFollowNoReturn.map((u) => `<li>@${u}</li>`).join('')
-      : '<li class="empty">None ✓</li>';
+      ? data.theyFollowNoReturn.map(u => `<li>@${u}</li>`).join('')
+      : '<li class="empty-state">None ✓</li>';
 
     const feedEl = document.getElementById('event-feed');
     if (!data.events.length) {
-      feedEl.innerHTML = '<p class="empty">No events yet — first check still pending.</p>';
+      feedEl.innerHTML = '<p class="empty-state">No events yet — check is pending.</p>';
     } else {
-      feedEl.innerHTML = data.events.map((e) => {
+      feedEl.innerHTML = data.events.map(e => {
         const isUnfollow = e.type === 'unfollowed';
-        return `<div class="feed-item">
-          <span class="${isUnfollow ? 'unfollow' : 'follow'}">
-            ${isUnfollow ? '❌' : '✅'} @${e.target_username} ${isUnfollow ? 'unfollowed you' : 'followed you'}
-          </span>
-          <span class="time">${timeAgo(e.detected_at)}</span>
+        return `<div class="event-item ${isUnfollow ? 'unfollow' : 'follow'}">
+          <div class="event-left">
+            <span class="event-icon">${isUnfollow ? '↓' : '↑'}</span>
+            <div class="event-text">
+              <strong>@${e.target_username}</strong>
+              <span class="ev-action"> ${isUnfollow ? 'unfollowed you' : 'followed you'}</span>
+            </div>
+          </div>
+          <span class="event-time">${timeAgo(e.detected_at)}</span>
         </div>`;
       }).join('');
     }
@@ -272,6 +730,8 @@
     if (userId) {
       await loadDashboard(userId);
       show('dashboard');
+    } else {
+      show('view-register');
     }
   });
 </script>
