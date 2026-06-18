@@ -30,9 +30,9 @@ async function fetchList(userId, type) {
       headers: headers(),
     });
 
-    const users = res.data.users || [];
-    for (const u of users) results.push(u.username);
-    maxId = res.data.next_max_id || null;
+    const [users, nextCursor] = res.data;
+    for (const u of (users || [])) results.push(u.username);
+    maxId = nextCursor || null;
   } while (maxId);
 
   return results;
