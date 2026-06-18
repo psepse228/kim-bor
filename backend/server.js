@@ -30,7 +30,8 @@ app.post('/register', async (req, res) => {
     .single();
 
   if (existing?.is_verified) {
-    return res.status(409).json({ error: 'This Instagram account is already registered.' });
+    // Already registered and verified — treat as login, go straight to dashboard
+    return res.status(200).json({ userId: existing.id, alreadyVerified: true });
   }
 
   if (existing && !existing.is_verified) {

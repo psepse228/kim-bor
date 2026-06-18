@@ -151,6 +151,13 @@
     const data = await res.json();
     if (!res.ok) return showError('reg-error', data.error);
 
+    if (data.alreadyVerified) {
+      localStorage.setItem('igcheck_userId', data.userId);
+      await loadDashboard(data.userId);
+      show('dashboard');
+      return;
+    }
+
     pendingUserId = data.userId;
     document.getElementById('otp-instruction').textContent = data.message;
     show('view-otp');
