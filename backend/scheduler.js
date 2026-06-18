@@ -6,6 +6,11 @@ const { sendUnfollowAlert, sendNewFollowerAlert, sendPrivatePendingAlert } = req
 const jobs = new Map(); // userId → cron task
 
 async function runCheckForUser(user) {
+  // Re-fetch user from DB so pending_follow and other fields are always current
+  const { data: freshUser } = await supabase.from('users').select('*').eq('id', user.id).single();
+  if (!freshUser) return;
+  user = freshUser;
+
   let lists;
 
   try {
